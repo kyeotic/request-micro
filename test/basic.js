@@ -1,15 +1,15 @@
 var concat = require('concat-stream')
 var http = require('http')
-var get = require('../')
+var request = require('../')
 var selfSignedHttps = require('self-signed-https')
-var str = require('string-to-stream')
 var test = require('tape')
-var zlib = require('zlib')
+
+var get = request.raw
 
 // Allow self-signed certs
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
 
-test('simple get', function (t) {
+test('request', function (t) {
   t.plan(4)
 
   var server = http.createServer(function (req, res) {
@@ -153,50 +153,6 @@ test('custom headers', function (t) {
   })
 })
 
-test('gzip response', function (t) {
-  t.plan(3)
-
-  var server = http.createServer(function (req, res) {
-    res.statusCode = 200
-    res.setHeader('content-encoding', 'gzip')
-    str('response').pipe(zlib.createGzip()).pipe(res)
-  })
-
-  server.listen(0, function () {
-    var port = server.address().port
-    get('http://localhost:' + port, function (err, res) {
-      t.error(err)
-      t.equal(res.statusCode, 200) // statusCode still works on gunzip stream
-      res.pipe(concat(function (data) {
-        t.equal(data.toString(), 'response')
-        server.close()
-      }))
-    })
-  })
-})
-
-test('deflate response', function (t) {
-  t.plan(3)
-
-  var server = http.createServer(function (req, res) {
-    res.statusCode = 200
-    res.setHeader('content-encoding', 'deflate')
-    str('response').pipe(zlib.createDeflate()).pipe(res)
-  })
-
-  server.listen(0, function () {
-    var port = server.address().port
-    get('http://localhost:' + port, function (err, res) {
-      t.error(err)
-      t.equal(res.statusCode, 200) // statusCode still works on inflate stream
-      res.pipe(concat(function (data) {
-        t.equal(data.toString(), 'response')
-        server.close()
-      }))
-    })
-  })
-})
-
 test('https', function (t) {
   t.plan(4)
 
@@ -306,7 +262,7 @@ test('post (text body)', function (t) {
       url: 'http://localhost:' + port,
       body: 'this is the body'
     }
-    get.post(opts, function (err, res) {
+    request.post(opts, function (err, res) {
       t.error(err)
       t.equal(res.statusCode, 200)
       res.pipe(concat(function (data) {
@@ -332,7 +288,7 @@ test('post (buffer body)', function (t) {
       url: 'http://localhost:' + port,
       body: new Buffer('this is the body')
     }
-    get.post(opts, function (err, res) {
+    request.post(opts, function (err, res) {
       t.error(err)
       t.equal(res.statusCode, 200)
       res.pipe(concat(function (data) {
@@ -343,7 +299,7 @@ test('post (buffer body)', function (t) {
   })
 })
 
-test('get.concat', function (t) {
+test('request', function (t) {
   t.plan(4)
   var server = http.createServer(function (req, res) {
     res.statusCode = 200
@@ -352,7 +308,7 @@ test('get.concat', function (t) {
 
   server.listen(0, function () {
     var port = server.address().port
-    get.concat('http://localhost:' + port, function (err, res, data) {
+    request('http://localhost:' + port, function (err, res, data) {
       t.error(err)
       t.equal(res.statusCode, 200)
       t.ok(Buffer.isBuffer(data), '`data` is type buffer')
@@ -384,7 +340,7 @@ test('access `req` object', function (t) {
   })
 })
 
-test('simple get json', function (t) {
+test('request json', function (t) {
   t.plan(5)
 
   var server = http.createServer(function (req, res) {
@@ -411,7 +367,7 @@ test('simple get json', function (t) {
   })
 })
 
-test('get.concat json', function (t) {
+test('request json', function (t) {
   t.plan(3)
   var server = http.createServer(function (req, res) {
     res.statusCode = 200
@@ -424,7 +380,7 @@ test('get.concat json', function (t) {
       url: 'http://localhost:' + port + '/path',
       json: true
     }
-    get.concat(opts, function (err, res, data) {
+    request(opts, function (err, res, data) {
       t.error(err)
       t.equal(res.statusCode, 200)
       t.equal(data.message, 'response')
@@ -433,7 +389,7 @@ test('get.concat json', function (t) {
   })
 })
 
-test('get.concat json error', function (t) {
+test('request json error', function (t) {
   t.plan(1)
   var server = http.createServer(function (req, res) {
     res.statusCode = 500
@@ -446,7 +402,7 @@ test('get.concat json error', function (t) {
       url: 'http://localhost:' + port + '/path',
       json: true
     }
-    get.concat(opts, function (err, res, data) {
+    request(opts, function (err, res, data) {
       t.ok(err instanceof Error)
       server.close()
     })
@@ -473,7 +429,7 @@ test('post (json body)', function (t) {
       },
       json: true
     }
-    get.concat(opts, function (err, res, data) {
+    request(opts, function (err, res, data) {
       t.error(err)
       t.equal(res.statusCode, 200)
       t.equal(data.message, 'this is the body')

@@ -1,14 +1,32 @@
-module.exports = simpleGet
+module.exports = request
+module.exports.raw = rawRequest
 
-var extend = require('xtend')
 var http = require('http')
 var https = require('https')
-var once = require('once')
-var unzipResponse = require('unzip-response') // excluded from browser build
 var url = require('url')
 
-function simpleGet (opts, cb) {
-  opts = typeof opts === 'string' ? { url: opts } : extend(opts)
+function once (fn) {
+  var f = function () {
+    if (f.called) return f.value
+    f.called = true
+    f.value = fn.apply(this, arguments)
+    return f.value
+  }
+  f.called = false
+  return f
+}
+
+function shallowCopy (target, source) {
+  for (var key in source) {
+    if (source.hasOwnProperty(key)) {
+      target[key] = source[key]
+    }
+  }
+  return target
+}
+
+function rawRequest (opts, cb) {
+  opts = typeof opts === 'string' ? { url: opts } : shallowCopy({}, opts)
   cb = once(cb)
 
   if (opts.url) parseOptsUrl(opts)
@@ -18,15 +36,8 @@ function simpleGet (opts, cb) {
   var body = opts.json ? JSON.stringify(opts.body) : opts.body
   opts.body = undefined
   if (body && !opts.method) opts.method = 'POST'
-
   if (opts.json) opts.headers.accept = 'application/json'
   if (opts.json && body) opts.headers['content-type'] = 'application/json'
-
-  // Request gzip/deflate
-  var customAcceptEncoding = Object.keys(opts.headers).some(function (h) {
-    return h.toLowerCase() === 'accept-encoding'
-  })
-  if (!customAcceptEncoding) opts.headers['accept-encoding'] = 'gzip, deflate'
 
   // Support http: and https: urls
   var protocol = opts.protocol === 'https:' ? https : http
@@ -38,21 +49,19 @@ function simpleGet (opts, cb) {
       res.resume() // Discard response
 
       opts.maxRedirects -= 1
-      if (opts.maxRedirects > 0) simpleGet(opts, cb)
+      if (opts.maxRedirects > 0) rawRequest(opts, cb)
       else cb(new Error('too many redirects'))
-
       return
     }
-
-    cb(null, typeof unzipResponse === 'function' ? unzipResponse(res) : res)
+    cb(null, res)
   })
   req.on('error', cb)
   req.end(body)
   return req
 }
 
-module.exports.concat = function (opts, cb) {
-  return simpleGet(opts, function (err, res) {
+function request (opts, cb) {
+  return rawRequest(opts, function (err, res) {
     if (err) return cb(err)
     var chunks = []
     res.on('data', function (chunk) {
@@ -76,7 +85,7 @@ module.exports.concat = function (opts, cb) {
   module.exports[method] = function (opts, cb) {
     if (typeof opts === 'string') opts = { url: opts }
     opts.method = method.toUpperCase()
-    return simpleGet(opts, cb)
+    return rawRequest(opts, cb)
   }
 })
 
