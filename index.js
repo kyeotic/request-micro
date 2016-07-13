@@ -70,6 +70,7 @@ function request (opts, cb) {
     res.on('end', function () {
       var data = Buffer.concat(chunks)
       if (opts.json) {
+        if (data.length === 0) return cb(err, res, null)
         try {
           data = JSON.parse(data.toString())
         } catch (err) {
