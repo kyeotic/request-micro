@@ -26,7 +26,7 @@ function shallowCopy (target, source) {
 }
 
 function rawRequest (opts, cb) {
-  opts = typeof opts === 'string' ? { url: opts } : shallowCopy({}, opts)
+  opts = typeof opts === 'string' ? { url: opts } : shallowCopy(opts)
   cb = once(cb)
 
   if (opts.url) parseOptsUrl(opts)
@@ -36,6 +36,7 @@ function rawRequest (opts, cb) {
   var body = opts.json ? JSON.stringify(opts.body) : opts.body
   opts.body = undefined
   if (body && !opts.method) opts.method = 'POST'
+  if (opts.method) opts.method = opts.method.toUpperCase()
   if (opts.json) opts.headers.accept = 'application/json'
   if (opts.json && body) opts.headers['content-type'] = 'application/json'
 
@@ -61,6 +62,18 @@ function rawRequest (opts, cb) {
 }
 
 function request (opts, cb) {
+  if (cb === undefined) {
+    if (typeof global.Promise === 'function') {
+      return new Promise(function (resolve, reject) {
+        request(opts, function (err, result) {
+          if (err) reject(err)
+          else resolve(result)
+        })
+      })
+    }
+    // Otherwise
+    throw new Error('No callback was supplied, and global.Promise is not a function. You must provide an async interface')
+  }
   return rawRequest(opts, function (err, res) {
     if (err) return cb(err)
     var chunks = []
@@ -73,6 +86,7 @@ function request (opts, cb) {
         if (data.length === 0) return cb(err, res, null)
         try {
           data = JSON.parse(data.toString())
+          res.data = data
         } catch (err) {
           return cb(err, res, data)
         }
@@ -86,7 +100,7 @@ function request (opts, cb) {
   module.exports[method] = function (opts, cb) {
     if (typeof opts === 'string') opts = { url: opts }
     opts.method = method.toUpperCase()
-    return request(opts, cb)
+    return rawRequest(opts, cb)
   }
 })
 

@@ -2,7 +2,7 @@ var concat = require('concat-stream')
 var http = require('http')
 var request = require('../')
 var selfSignedHttps = require('self-signed-https')
-var test = require('tape')
+var test = require('blue-tape')
 
 var get = request.raw
 
@@ -251,7 +251,7 @@ test('post (text body)', function (t) {
   t.plan(4)
 
   var server = http.createServer(function (req, res) {
-    t.equal(req.method, 'POST')
+    t.equal(req.method, 'POST', 'http method')
     res.statusCode = 200
     req.pipe(res)
   })
@@ -263,10 +263,10 @@ test('post (text body)', function (t) {
       body: 'this is the body'
     }
     request.post(opts, function (err, res) {
-      t.error(err)
-      t.equal(res.statusCode, 200)
+      t.error(err, 'error')
+      t.equal(res.statusCode, 200, 'status code')
       res.pipe(concat(function (data) {
-        t.equal(data.toString(), 'this is the body')
+        t.equal(data.toString(), 'this is the body', 'body')
         server.close()
       }))
     })
@@ -433,6 +433,34 @@ test('post (json body)', function (t) {
       t.error(err)
       t.equal(res.statusCode, 200)
       t.equal(data.message, 'this is the body')
+      server.close()
+    })
+  })
+})
+
+test('no callback returns promise', function (t) {
+  var server = http.createServer(function (req, res) {
+    res.statusCode = 200
+    res.end('{"message":"response"}')
+  })
+
+  server.listen(0, function () {
+    var port = server.address().port
+    var opts = {
+      url: 'http://localhost:' + port + '/path',
+      json: true
+    }
+    var promise = request(opts)
+    t.equal(typeof promise.then, 'function')
+
+    return promise.then(function (res) {
+      t.equal(res.statusCode, 200)
+      t.equal(res.data.message, 'response')
+      server.close()
+      t.end()
+    })
+    .catch(function (err) {
+      t.error(err)
       server.close()
     })
   })
