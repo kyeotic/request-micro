@@ -259,10 +259,11 @@ test('post (text body)', function (t) {
   server.listen(0, function () {
     var port = server.address().port
     var opts = {
+      method: 'POST',
       url: 'http://localhost:' + port,
       body: 'this is the body'
     }
-    request.post(opts, function (err, res) {
+    request.raw(opts, function (err, res) {
       t.error(err, 'error')
       t.equal(res.statusCode, 200, 'status code')
       res.pipe(concat(function (data) {
@@ -285,10 +286,11 @@ test('post (buffer body)', function (t) {
   server.listen(0, function () {
     var port = server.address().port
     var opts = {
+      method: 'POST',
       url: 'http://localhost:' + port,
       body: new Buffer('this is the body')
     }
-    request.post(opts, function (err, res) {
+    request.raw(opts, function (err, res) {
       t.error(err)
       t.equal(res.statusCode, 200)
       res.pipe(concat(function (data) {

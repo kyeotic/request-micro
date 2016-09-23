@@ -100,7 +100,7 @@ function request (opts, cb) {
   module.exports[method] = function (opts, cb) {
     if (typeof opts === 'string') opts = { url: opts }
     opts.method = method.toUpperCase()
-    return rawRequest(opts, cb)
+    return request(opts, cb)
   }
 })
 
