@@ -320,6 +320,28 @@ test('request', function (t) {
   })
 })
 
+test('request data with promise', function (t) {
+  t.plan(3)
+  var server = http.createServer(function (req, res) {
+    res.statusCode = 200
+    res.end('blah blah blah')
+  })
+
+  server.listen(0, function () {
+    var port = server.address().port
+    request('http://localhost:' + port)
+      .then(res => {
+        t.equal(res.statusCode, 200)
+        t.ok(Buffer.isBuffer(res.data), '`data` is type buffer')
+        t.equal(res.data.toString(), 'blah blah blah')
+        server.close()
+      }).catch(err => {
+        t.error(err)
+        server.close()
+      })
+  })
+})
+
 test('access `req` object', function (t) {
   t.plan(2)
 

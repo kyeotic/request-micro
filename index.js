@@ -90,6 +90,8 @@ function request (opts, cb) {
         } catch (err) {
           return cb(err, res, data)
         }
+      } else {
+        res.data = data
       }
       cb(null, res, data)
     })
