@@ -1,9 +1,20 @@
 module.exports = request
 module.exports.raw = rawRequest
 
-var http = require('http')
-var https = require('https')
 var url = require('url')
+
+// Lazily load these, since most likely only one is necessary
+var _http, _https
+var net = {
+  http: function () {
+    if (_http === undefined) _http = require('http')
+    return _http
+  },
+  https: function () {
+    if (_https === undefined) _https = require('https')
+    return _https
+  }
+}
 
 function once (fn) {
   var f = function () {
@@ -41,7 +52,7 @@ function rawRequest (opts, cb) {
   if (opts.json && body) opts.headers['content-type'] = 'application/json'
 
   // Support http: and https: urls
-  var protocol = opts.protocol === 'https:' ? https : http
+  var protocol = opts.protocol === 'https:' ? net.https() : net.http()
   var req = protocol.request(opts, function (res) {
     // Follow 3xx redirects
     if (res.statusCode >= 300 && res.statusCode < 400 && 'location' in res.headers) {

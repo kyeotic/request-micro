@@ -11,6 +11,7 @@
     "url": "https://github.com/tyrsius/request-micro/issues"
   },
   "devDependencies": {
+    "babel-eslint": "^7.2.3",
     "blue-tape": "^1.0.0",
     "concat-stream": "^1.4.7",
     "self-signed-https": "^1.0.5",
