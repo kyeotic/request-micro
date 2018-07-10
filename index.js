@@ -16,7 +16,9 @@ var net = {
   }
 }
 
-const isStream = o => o !== null && typeof o === 'object' && typeof o.pipe === 'function'
+function isStream (o) {
+  return o !== null && typeof o === 'object' && typeof o.pipe === 'function'
+}
 
 function once (fn) {
   var f = function () {
