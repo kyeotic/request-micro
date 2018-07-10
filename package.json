@@ -1,7 +1,7 @@
 {
   "name": "request-micro",
   "description": "A tiny request library with no dependencies. Supports Http(s) and follows redirects",
-  "version": "1.2.4",
+  "version": "1.3.0",
   "author": {
     "name": "Timothy Kye",
     "email": "tim@kye.plus",
