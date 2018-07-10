@@ -2,6 +2,7 @@ var concat = require('concat-stream')
 var http = require('http')
 var request = require('../')
 var selfSignedHttps = require('self-signed-https')
+var str = require('string-to-stream')
 var test = require('blue-tape')
 
 var get = request.raw
@@ -289,6 +290,33 @@ test('post (buffer body)', function (t) {
       method: 'POST',
       url: 'http://localhost:' + port,
       body: new Buffer('this is the body')
+    }
+    request.raw(opts, function (err, res) {
+      t.error(err)
+      t.equal(res.statusCode, 200)
+      res.pipe(concat(function (data) {
+        t.equal(data.toString(), 'this is the body')
+        server.close()
+      }))
+    })
+  })
+})
+
+test('post (stream body)', function (t) {
+  t.plan(4)
+
+  var server = http.createServer(function (req, res) {
+    t.equal(req.method, 'POST')
+    res.statusCode = 200
+    req.pipe(res)
+  })
+
+  server.listen(0, function () {
+    var port = server.address().port
+    var opts = {
+      method: 'POST',
+      url: 'http://localhost:' + port,
+      body: str('this is the body')
     }
     request.raw(opts, function (err, res) {
       t.error(err)

@@ -16,6 +16,8 @@ var net = {
   }
 }
 
+const isStream = o => o !== null && typeof o === 'object' && typeof o.pipe === 'function'
+
 function once (fn) {
   var f = function () {
     if (f.called) return f.value
@@ -68,7 +70,8 @@ function rawRequest (opts, cb) {
     cb(null, res)
   })
   req.on('error', cb)
-  req.end(body)
+  if (isStream(body)) body.on('error', cb).pipe(req)
+  else req.end(body)
   return req
 }
 
