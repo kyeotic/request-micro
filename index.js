@@ -71,6 +71,10 @@ function rawRequest (opts, cb) {
     }
     cb(null, res)
   })
+  req.on('timeout', () => {
+    req.abort()
+    cb(new Error('Request timed out'))
+  })
   req.on('error', cb)
   if (isStream(body)) body.on('error', cb).pipe(req)
   else req.end(body)
