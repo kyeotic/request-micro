@@ -65,8 +65,12 @@ function rawRequest (opts, cb) {
       res.resume() // Discard response
 
       opts.maxRedirects -= 1
-      if (opts.maxRedirects > 0) rawRequest(opts, cb)
-      else cb(new Error('too many redirects'))
+      if (opts.maxRedirects > 0) {
+        opts.body = body
+        rawRequest(opts, cb)
+      } else {
+        cb(new Error('too many redirects'))
+      }
       return
     }
     cb(null, res)

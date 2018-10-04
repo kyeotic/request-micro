@@ -130,6 +130,50 @@ test('follow redirects (11 is too many)', function (t) {
   })
 })
 
+test.only('follow redirects with body', function (t) {
+  t.plan(13)
+
+  var num = 1
+  var server = http.createServer(function (req, res) {
+    t.equal(req.url, '/' + num, 'visited /' + num)
+    // t.equal(req.body, '1')
+    num += 1
+
+    if (num <= 10) {
+      res.statusCode = 307
+      res.setHeader('Location', '/' + num)
+      res.end()
+    } else {
+      res.statusCode = 200
+
+      var chunks = []
+      req.on('data', function (chunk) {
+        chunks.push(chunk)
+      })
+      req.on('end', function () {
+        res.end(Buffer.concat(chunks))
+      })
+    }
+  })
+
+  server.listen(0, function () {
+    var port = server.address().port
+    var opts = {
+      method: 'POST',
+      url: 'http://localhost:' + port + '/1',
+      body: 'this is the body'
+    }
+    request.raw(opts, function (err, res) {
+      t.error(err, 'error')
+      t.equal(res.statusCode, 200, 'status code')
+      res.pipe(concat(function (data) {
+        t.equal(data.toString(), 'this is the body', 'body')
+        server.close()
+      }))
+    })
+  })
+})
+
 test('custom headers', function (t) {
   t.plan(2)
 
