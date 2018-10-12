@@ -130,7 +130,7 @@ test('follow redirects (11 is too many)', function (t) {
   })
 })
 
-test.only('follow redirects with body', function (t) {
+test('follow redirects with body', function (t) {
   t.plan(13)
 
   var num = 1
