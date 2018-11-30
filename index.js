@@ -1,5 +1,7 @@
 module.exports = request
 module.exports.raw = rawRequest
+module.exports.isSuccessStatus = isSuccessStatus
+module.exports.isErrorStatus = isErrorStatus
 
 var url = require('url')
 
@@ -138,4 +140,12 @@ function parseOptsUrl (opts) {
   if (loc.auth) opts.auth = loc.auth
   opts.path = loc.path
   delete opts.url
+}
+
+function isSuccessStatus (response) {
+  return response.statusCode.toString()[0] === '2'
+}
+
+function isErrorStatus (response) {
+  return !isSuccessStatus(response)
 }
