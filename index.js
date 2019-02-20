@@ -54,8 +54,8 @@ function rawRequest (opts, cb) {
   opts.body = undefined
   if (body && !opts.method) opts.method = 'POST'
   if (opts.method) opts.method = opts.method.toUpperCase()
-  if (opts.json) opts.headers.accept = 'application/json'
-  if (opts.json && body) opts.headers['content-type'] = 'application/json'
+  if (opts.json) opts.headers['Accept'] = 'application/json'
+  if (opts.json && body) opts.headers['Content-Type'] = 'application/json'
 
   // Support http: and https: urls
   var protocol = opts.protocol === 'https:' ? net.https() : net.http()
