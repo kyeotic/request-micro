@@ -1,0 +1,18 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "declaration": true,
+    "incremental": false
+  },
+  "exclude": [
+    "node_modules",
+    "test",
+    "dist",
+    "**/test/**",
+    "**/__tests__/**",
+    "**/*.spec.ts",
+    "**/*.int.ts",
+    "**/*.test.ts",
+    "infrastructure"
+  ]
+}

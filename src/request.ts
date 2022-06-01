@@ -42,7 +42,7 @@ function once<F extends (...args: any) => any>(fn: F): Single<F> {
 
 function rawRequest(
   optionsOrUrl: RequestOptions | string,
-  cb: (err: Error | null, response?: Http.IncomingMessage) => void,
+  cb: (err: Error | null, response: Http.IncomingMessage) => void,
 ) {
   const options: RequestOptions =
     typeof optionsOrUrl === 'string'
@@ -79,6 +79,7 @@ function rawRequest(
         options.body = body
         rawRequest(options, callback)
       } else {
+        // @ts-ignore
         callback(new Error('too many redirects'))
       }
       return
@@ -87,6 +88,7 @@ function rawRequest(
   })
   req.on('timeout', () => {
     req.abort()
+    // @ts-ignore
     callback(new Error('Request timed out'))
   })
   req.on('error', callback)
@@ -128,6 +130,8 @@ export default async function request(
     )
   })
 }
+
+export { request }
 
 type RequestResult = ReturnType<typeof request>
 const mainRequest = request
