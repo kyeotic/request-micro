@@ -2,35 +2,49 @@
   "name": "request-micro",
   "description": "A tiny request library with no dependencies. Supports Http(s) and follows redirects",
   "version": "1.5.1",
-  "author": {
-    "name": "Timothy Kye",
-    "email": "tim@kye.plus",
-    "url": "http://kye.plus"
+  "main": "index.js",
+  "scripts": {
+    "build": "run-s gen build:tsc",
+    "build:tsc": "del dist/ && tsc --project tsconfig.build.json",
+    "check": "run-s style lint",
+    "check:ci": "run-s style:ci lint",
+    "lint": "eslint \"src/**/*.{ts,tsx}\" --ext .ts,.tsx",
+    "style": "prettier  --write \"src/**/*.{ts,tsx}\"",
+    "style:ci": "prettier --check \"src/**/*.{ts,tsx}\"",
+    "test": "jest",
+    "test:ci": "run-s check:ci gen test build",
+    "test:watch": "jest --watch"
   },
   "bugs": {
-    "url": "https://github.com/tyrsius/request-micro/issues"
+    "url": "https://github.com/kyeotic/request-micro/issues"
   },
   "devDependencies": {
-    "babel-eslint": "^7.2.3",
-    "blue-tape": "^1.0.0",
-    "concat-stream": "^1.4.7",
-    "self-signed-https": "^1.0.5",
-    "standard": "^7.0.1",
-    "string-to-stream": "^1.0.0",
-    "tap-spec": "^4.1.1"
+    "@types/jest": "^27.5.1",
+    "@types/node": "^17.0.38",
+    "@typescript-eslint/eslint-plugin": "^5.27.0",
+    "@typescript-eslint/parser": "^5.27.0",
+    "eslint": "^8.16.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-prettier": "^4.0.0",
+    "jest": "^28.1.0",
+    "jest-watch-typeahead": "^1.1.0",
+    "npm-run-all": "^4.1.5",
+    "prettier": "^2.6.2",
+    "typescript": "^4.7.2"
   },
-  "homepage": "https://github.com/tyrsius/request-micro",
   "keywords": [
     "request",
     "http"
   ],
   "license": "MIT",
-  "main": "index.js",
+  "author": {
+    "name": "Tim Kye",
+    "email": "tim@kye.dev",
+    "url": "http://kye.dev"
+  },
+  "homepage": "https://github.com/kyeotic/request-micro",
   "repository": {
     "type": "git",
-    "url": "git://github.com/tyrsius/request-micro.git"
-  },
-  "scripts": {
-    "test": "standard && blue-tape test/*.js | tap-spec"
+    "url": "git://github.com/kyeotic/request-micro.git"
   }
 }
