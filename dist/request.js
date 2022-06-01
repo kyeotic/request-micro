@@ -8,12 +8,12 @@ let _https;
 const net = {
     http: function () {
         if (!_http)
-            _http = require('http');
+            _http = require('node:http');
         return _http;
     },
     https: function () {
         if (!_https)
-            _https = require('https');
+            _https = require('node:https');
         return _https;
     },
 };
