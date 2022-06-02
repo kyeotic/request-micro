@@ -1,0 +1,23 @@
+#!/bin/bash
+set -e
+
+if [ ! -z "$(git status --porcelain)" ]; then
+  echo "Working directory is dirty"
+  exit 1
+fi
+
+# Create Prep file
+cat package.json | jq '. | { name, description, version, main, types, files }' >> package.prep.json
+
+# Store original and swap prep
+cp package.json package.original.json && cp package.prep.json package.json
+
+rm CHANGELOG.md
+
+git add .
+git commit -m "release"
+
+# Release, then revert
+npx np --any-branch; cp package.original.json package.json && rm package.prep.json package.original.json
+
+git reset --hard HEAD~2

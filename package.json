@@ -1,25 +1,25 @@
 {
   "name": "request-micro",
   "description": "A tiny request library with no dependencies. Supports Http(s) and follows redirects",
-  "version": "2.0.0",
+  "version": "2.0.1-0",
   "main": "./dist/request.js",
   "types": "./dist/request.d.ts",
   "files": [
     "dist/"
   ],
   "scripts": {
-    "build": "run-s build:tsc",
-    "build:tsc": "del dist/ && tsc --project tsconfig.build.json",
+    "build": "run-s build:clean build:tsc build:js",
+    "build:clean": "del dist/",
+    "build:tsc": "tsc --project tsconfig.build.json",
+    "build:js": "node esbuild.js",
     "check": "run-s style lint",
-    "check:ci": "run-s style:ci lint",
     "lint": "eslint \"src/**/*.{ts,tsx}\" --ext .ts,.tsx",
     "style": "prettier  --write \"src/**/*.{ts,tsx}\"",
-    "style:ci": "prettier --check \"src/**/*.{ts,tsx}\"",
-    "test": "cross-env NODE_TLS_REJECT_UNAUTHORIZED=0 jest",
-    "test:ci": "run-s check:ci test build size",
+    "test": "run-s build test:unit size",
+    "test:unit": "cross-env NODE_TLS_REJECT_UNAUTHORIZED=0 jest",
     "test:watch": "cross-env NODE_TLS_REJECT_UNAUTHORIZED=0 jest --watch",
     "size": "size-limit",
-    "release": "np"
+    "release": "./release"
   },
   "bugs": {
     "url": "https://github.com/kyeotic/request-micro/issues"
@@ -33,6 +33,7 @@
     "concat-stream": "^2.0.0",
     "cross-env": "^7.0.3",
     "del-cli": "^4.0.1",
+    "esbuild": "^0.14.42",
     "eslint": "^8.16.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-prettier": "^4.0.0",
@@ -49,12 +50,12 @@
   },
   "size-limit": [
     {
-      "limit": "4.5kb",
+      "limit": "2kb",
       "path": "dist/request.js",
       "ignore": [
-        "node:http",
-        "node:https",
-        "node:url"
+        "http",
+        "https",
+        "url"
       ]
     }
   ],
