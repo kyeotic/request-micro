@@ -19,7 +19,7 @@
     "test:unit": "cross-env NODE_TLS_REJECT_UNAUTHORIZED=0 jest",
     "test:watch": "cross-env NODE_TLS_REJECT_UNAUTHORIZED=0 jest --watch",
     "size": "size-limit",
-    "release": "./release"
+    "release": "np"
   },
   "bugs": {
     "url": "https://github.com/kyeotic/request-micro/issues"

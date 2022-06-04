@@ -3,7 +3,7 @@
 import type Http from 'node:http';
 import type Https from 'node:https';
 export declare type RequestOptions = {
-    url: string;
+    url?: string;
     maxRedirects?: number;
     json?: boolean;
     body?: any;

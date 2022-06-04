@@ -8,11 +8,13 @@ type Single<F extends (...args: any) => any> = F & {
 }
 
 export type RequestOptions = {
-  url: string
+  url?: string
   maxRedirects?: number
   json?: boolean
   body?: any
 } & Https.RequestOptions
+
+type UrlRequest = RequestOptions & { url: string }
 
 // Lazily load these, since most likely only one is necessary
 let _http: typeof Http
@@ -50,7 +52,7 @@ function rawRequest(
       : { ...optionsOrUrl }
   const callback = once(cb)
 
-  if (options.url) parseOptsUrl(options)
+  if (options.url) parseOptsUrl(options as UrlRequest)
   if (options.headers == null) options.headers = {}
   if (options.maxRedirects == null) options.maxRedirects = 10
 
@@ -71,7 +73,7 @@ function rawRequest(
       'location' in res.headers
     ) {
       options.url = res.headers.location!
-      parseOptsUrl(options)
+      parseOptsUrl(options as UrlRequest)
       res.resume() // Discard response
 
       options.maxRedirects! -= 1
@@ -153,7 +155,7 @@ const _delete = asMethod('delete')
 export { _delete as delete }
 export const options = asMethod('options')
 
-function parseOptsUrl(opts: RequestOptions) {
+function parseOptsUrl(opts: UrlRequest) {
   let loc = url.parse(opts.url)
   if (loc.hostname) opts.hostname = loc.hostname
   if (loc.port) opts.port = loc.port
